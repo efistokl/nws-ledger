@@ -8,37 +8,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddListCmd(t *testing.T) {
+func TestMain(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
 
 	binName := "./main"
-	run(t, "go", "build", "-o", binName)
+	assert.NoError(t, run("go", "build", "-o", binName))
 
-	run(t, binName, "add", "--amount", "250", "--name", "Groceries - supermarket", "--nws", "needs")
+	t.Run("Wrong args", func(t *testing.T) {
+		assert.Error(t, run(binName))
+		assert.Error(t, run(binName, "nonexistentcommand"))
+		assert.Error(t, run(binName, "add"))
+		assert.Error(t, run(binName, "add", "--nws", "test"))
+		assert.Error(t, run(binName, "add", "--amount", "-10"))
+		assert.Error(t, run(binName, "list", "args"))
+	})
 
-	output := runAndGetOutput(t, binName, "list")
+	t.Run("Add + List", func(t *testing.T) {
+		assert.NoError(t, run(binName, "add", "--amount", "250", "--name", "Groceries - supermarket", "--nws", "needs"))
 
-	assert.Equal(t, `name,amount,nws
-"Groceries - supermarket",250,needs`, output)
+		output := runAndGetOutput(t, binName, "list")
 
-	run(t, binName, "add", "--amount", "700", "--name", "new iPhone", "--nws", "wants")
+		assert.Equal(t, `name,amount,nws
+	"Groceries - supermarket",250,needs`, output)
 
-	output = runAndGetOutput(t, binName, "list")
+		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "new iPhone", "--nws", "wants"))
 
-	assert.Equal(t, `name,amount,nws
-"Groceries - supermarket",250,needs
-"new iPhone",700,wants`, output)
+		output = runAndGetOutput(t, binName, "list")
+
+		assert.Equal(t, `name,amount,nws
+	"Groceries - supermarket",250,needs
+	"new iPhone",700,wants`, output)
+	})
 }
 
-func run(t *testing.T, binName string, args ...string) {
+func run(binName string, args ...string) error {
 	cmd := exec.Command(binName, args...)
-	err := cmd.Run()
-	assert.NoError(t, err)
+	return cmd.Run()
 }
 
 func runAndGetOutput(t *testing.T, binName string, args ...string) string {
+	t.Helper()
 	cmd := exec.Command(binName, args...)
 
 	stdout, err := cmd.StdoutPipe()
