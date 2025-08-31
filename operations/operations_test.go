@@ -10,17 +10,22 @@ import (
 
 func TestJSONStorage(t *testing.T) {
 	t.Run("Add", func(t *testing.T) {
-		jsonStorage := NewJSONStorage(nil)
-		var expenseStorage ExpenseStorage = jsonStorage
+		var expenseStorage ExpenseStorage
+		js, err := NewJSONStorage(nil, nil)
+		assert.NoError(t, err)
+		expenseStorage = js
 
 		addSampleExpense(t, expenseStorage)
-		assert.Len(t, jsonStorage.Expenses, 1)
+		assert.Len(t, js.Expenses, 1)
 	})
 
 	t.Run("Save", func(t *testing.T) {
 		storage := &bytes.Buffer{}
 
-		var expenseStorage ExpenseStorage = NewJSONStorage(storage)
+		var expenseStorage ExpenseStorage
+		js, err := NewJSONStorage(nil, storage)
+		assert.NoError(t, err)
+		expenseStorage = js
 
 		addSampleExpense(t, expenseStorage)
 		assert.NoError(t, expenseStorage.Save())
@@ -28,9 +33,24 @@ func TestJSONStorage(t *testing.T) {
 	})
 
 	t.Run("List", func(t *testing.T) {
-		var expenseStorage ExpenseStorage = NewJSONStorage(nil)
+		var expenseStorage ExpenseStorage
+		js, err := NewJSONStorage(nil, nil)
+		assert.NoError(t, err)
+		expenseStorage = js
+
 		exp := addSampleExpense(t, expenseStorage)
 		assert.Equal(t, []Expense{exp}, expenseStorage.List())
+	})
+
+	t.Run("NewJSONStorage", func(t *testing.T) {
+		storage := bytes.NewBuffer([]byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`))
+
+		var expenseStorage ExpenseStorage
+		js, err := NewJSONStorage(storage, nil)
+		assert.NoError(t, err)
+		expenseStorage = js
+		assert.Len(t, expenseStorage.List(), 1)
+		assert.Equal(t, 250, expenseStorage.List()[0].Amount)
 	})
 }
 
@@ -47,9 +67,10 @@ func addSampleExpense(t testing.TB, es ExpenseStorage) Expense {
 
 func TestFormat(t *testing.T) {
 	t.Run("csv", func(t *testing.T) {
-		var expenseStorage ExpenseStorage = NewJSONStorage(nil)
-		addSampleExpense(t, expenseStorage)
-		csv := FormatCSV(expenseStorage)
+		jsonStorage, err := NewJSONStorage(nil, nil)
+		assert.NoError(t, err)
+		addSampleExpense(t, jsonStorage)
+		csv := FormatCSV(jsonStorage)
 
 		assert.Equal(t, `name,amount,nws
 Groceries - supermarket,250,needs

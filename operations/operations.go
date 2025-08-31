@@ -46,12 +46,23 @@ func FormatCSV(es ExpenseStorage) string {
 }
 
 type JSONStorage struct {
-	file     io.ReadWriter
+	store    io.Writer
 	Expenses []Expense `json:"expenses"`
 }
 
-func NewJSONStorage(source io.ReadWriter) *JSONStorage {
-	return &JSONStorage{file: source}
+// NewJSONStorage initializes JSONStorage by parsing the "source".
+// The "source" and "store" can point to one object
+func NewJSONStorage(source io.Reader, store io.Writer) (*JSONStorage, error) {
+	if source == nil {
+		return &JSONStorage{store: store}, nil
+	}
+
+	var expenses []Expense
+	err := json.NewDecoder(source).Decode(&expenses)
+	if err != nil {
+		return nil, err
+	}
+	return &JSONStorage{store: store, Expenses: expenses}, nil
 }
 
 func (storage *JSONStorage) Add(e Expense) error {
@@ -60,7 +71,7 @@ func (storage *JSONStorage) Add(e Expense) error {
 }
 
 func (storage *JSONStorage) Save() error {
-	return json.NewEncoder(storage.file).Encode(storage.Expenses)
+	return json.NewEncoder(storage.store).Encode(storage.Expenses)
 }
 
 func (storage *JSONStorage) List() []Expense {
