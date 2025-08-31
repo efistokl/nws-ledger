@@ -54,7 +54,7 @@ type JSONStorage struct {
 // The "source" and "store" can point to one object
 func NewJSONStorage(source io.Reader, store io.Writer) (*JSONStorage, error) {
 	if source == nil {
-		return &JSONStorage{store: store}, nil
+		return &JSONStorage{store: store, Expenses: make([]Expense, 0)}, nil
 	}
 
 	var expenses []Expense
