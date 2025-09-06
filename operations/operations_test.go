@@ -10,47 +10,40 @@ import (
 
 func TestJSONStorage(t *testing.T) {
 	t.Run("Add", func(t *testing.T) {
-		var expenseStorage ExpenseStorage
 		js, err := NewJSONStorage(nil, nil)
 		assert.NoError(t, err)
-		expenseStorage = js
 
-		addSampleExpense(t, expenseStorage)
+		addSampleExpense(t, js)
 		assert.Len(t, js.Expenses, 1)
 	})
 
 	t.Run("Save", func(t *testing.T) {
 		storage := &bytes.Buffer{}
 
-		var expenseStorage ExpenseStorage
 		js, err := NewJSONStorage(nil, storage)
 		assert.NoError(t, err)
-		expenseStorage = js
 
-		addSampleExpense(t, expenseStorage)
-		assert.NoError(t, expenseStorage.Save())
+		addSampleExpense(t, js)
+		assert.NoError(t, js.Save())
 		assert.True(t, json.Valid(storage.Bytes()), "source file backing JSONStorage should contain valid json: %s", storage.String())
 	})
 
 	t.Run("List", func(t *testing.T) {
-		var expenseStorage ExpenseStorage
 		js, err := NewJSONStorage(nil, nil)
 		assert.NoError(t, err)
-		expenseStorage = js
 
-		exp := addSampleExpense(t, expenseStorage)
-		assert.Equal(t, []Expense{exp}, expenseStorage.List())
+		exp := addSampleExpense(t, js)
+		assert.Equal(t, []Expense{exp}, js.List())
 	})
 
 	t.Run("NewJSONStorage", func(t *testing.T) {
 		storage := bytes.NewBuffer([]byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`))
 
-		var expenseStorage ExpenseStorage
 		js, err := NewJSONStorage(storage, nil)
 		assert.NoError(t, err)
-		expenseStorage = js
-		assert.Len(t, expenseStorage.List(), 1)
-		assert.Equal(t, 250, expenseStorage.List()[0].Amount)
+
+		assert.Len(t, js.List(), 1)
+		assert.Equal(t, 250, js.List()[0].Amount)
 	})
 }
 
