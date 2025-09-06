@@ -17,14 +17,14 @@ func TestJSONStorage(t *testing.T) {
 		assert.Len(t, js.Expenses, 1)
 	})
 
-	t.Run("Save", func(t *testing.T) {
+	t.Run("Flush", func(t *testing.T) {
 		storage := &bytes.Buffer{}
 
 		js, err := NewJSONStorage(nil, storage)
 		assert.NoError(t, err)
 
 		addSampleExpense(t, js)
-		assert.NoError(t, js.Save())
+		assert.NoError(t, js.Flush())
 		assert.True(t, json.Valid(storage.Bytes()), "source file backing JSONStorage should contain valid json: %s", storage.String())
 	})
 

@@ -25,7 +25,7 @@ type Expense struct {
 
 type ExpenseStorage interface {
 	Add(Expense) error
-	Save() error
+	Flush() error
 	List() []Expense
 }
 
@@ -70,7 +70,7 @@ func (storage *JSONStorage) Add(e Expense) error {
 	return nil
 }
 
-func (storage *JSONStorage) Save() error {
+func (storage *JSONStorage) Flush() error {
 	return json.NewEncoder(storage.store).Encode(storage.Expenses)
 }
 
