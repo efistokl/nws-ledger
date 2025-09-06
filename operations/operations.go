@@ -50,6 +50,13 @@ type JSONStorage struct {
 	Expenses []Expense `json:"expenses"`
 }
 
+// TODO:
+// - Remake JSONStorage to handle file saving.
+// - Save on every add for now.
+// - Revisit if I want to have Flush at all.
+// - For TDD use testing/fstest
+// JSONStorage as it is now is unusable
+
 // NewJSONStorage initializes JSONStorage by parsing the "source".
 // The "source" and "store" can point to one object
 func NewJSONStorage(source io.Reader, store io.Writer) (*JSONStorage, error) {
