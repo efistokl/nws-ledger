@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
+	"os"
 	"strings"
 )
 
@@ -25,7 +25,6 @@ type Expense struct {
 
 type ExpenseStorage interface {
 	Add(Expense) error
-	Flush() error
 	List() []Expense
 }
 
@@ -46,39 +45,40 @@ func FormatCSV(es ExpenseStorage) string {
 }
 
 type JSONStorage struct {
-	store    io.Writer
-	Expenses []Expense `json:"expenses"`
+	fileName string
+	Expenses []Expense
 }
 
-// TODO:
-// - Remake JSONStorage to handle file saving.
-// - Save on every add for now.
-// - Revisit if I want to have Flush at all.
-// - For TDD use testing/fstest
-// JSONStorage as it is now is unusable
-
-// NewJSONStorage initializes JSONStorage by parsing the "source".
-// The "source" and "store" can point to one object
-func NewJSONStorage(source io.Reader, store io.Writer) (*JSONStorage, error) {
-	if source == nil {
-		return &JSONStorage{store: store, Expenses: make([]Expense, 0)}, nil
-	}
-
-	var expenses []Expense
-	err := json.NewDecoder(source).Decode(&expenses)
+// NewJSONStorage initializes JSONStorage by parsing the file "fileName".
+// On every "Add" it rewrites the file.
+func NewJSONStorage(fileName string) (*JSONStorage, error) {
+	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
 	}
-	return &JSONStorage{store: store, Expenses: expenses}, nil
+	defer file.Close()
+
+	var expenses []Expense
+	if err := json.NewDecoder(file).Decode(&expenses); err != nil {
+		return nil, err
+	}
+
+	return &JSONStorage{fileName, expenses}, nil
 }
 
 func (storage *JSONStorage) Add(e Expense) error {
 	storage.Expenses = append(storage.Expenses, e)
-	return nil
+	return storage.flush()
 }
 
-func (storage *JSONStorage) Flush() error {
-	return json.NewEncoder(storage.store).Encode(storage.Expenses)
+func (storage *JSONStorage) flush() error {
+	file, err := os.OpenFile(storage.fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0600)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return json.NewEncoder(file).Encode(storage.Expenses)
 }
 
 func (storage *JSONStorage) List() []Expense {

@@ -1,49 +1,77 @@
 package operations
 
 import (
-	"bytes"
-	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func setupFile(t testing.TB, data []byte) (string, func()) {
+	f, err := os.CreateTemp("", "store-*.json")
+	assert.NoError(t, err)
+	defer f.Close()
+
+	_, err = f.Write(data)
+	assert.NoError(t, err)
+
+	fileName := f.Name()
+
+	return fileName, func() {
+		assert.NoError(t, os.Remove(fileName), "failed to remove test file %s", fileName)
+	}
+}
+
+func TestSetupFile(t *testing.T) {
+	content := "content"
+	fileName, teardown := setupFile(t, []byte(content))
+
+	assert.FileExists(t, fileName)
+
+	data, err := os.ReadFile(fileName)
+	assert.NoError(t, err)
+	assert.Equal(t, content, string(data))
+
+	teardown()
+	assert.NoFileExists(t, fileName)
+}
+
 func TestJSONStorage(t *testing.T) {
+	t.Run("NewJSONStorage", func(t *testing.T) {
+		data := []byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`)
+		fileName, teardown := setupFile(t, data)
+		defer teardown()
+
+		js, err := NewJSONStorage(fileName)
+		assert.NoError(t, err)
+		assert.Len(t, js.Expenses, 1)
+		assert.Equal(t, 250, js.Expenses[0].Amount)
+	})
+
 	t.Run("Add", func(t *testing.T) {
-		js, err := NewJSONStorage(nil, nil)
+		fileName, teardown := setupFile(t, []byte("[]"))
+		defer teardown()
+
+		js, err := NewJSONStorage(fileName)
 		assert.NoError(t, err)
 
 		addSampleExpense(t, js)
 		assert.Len(t, js.Expenses, 1)
-	})
 
-	t.Run("Flush", func(t *testing.T) {
-		storage := &bytes.Buffer{}
-
-		js, err := NewJSONStorage(nil, storage)
-		assert.NoError(t, err)
-
-		addSampleExpense(t, js)
-		assert.NoError(t, js.Flush())
-		assert.True(t, json.Valid(storage.Bytes()), "source file backing JSONStorage should contain valid json: %s", storage.String())
+		data, err := os.ReadFile(fileName)
+		assert.Contains(t, string(data), `"amount":250`)
 	})
 
 	t.Run("List", func(t *testing.T) {
-		js, err := NewJSONStorage(nil, nil)
-		assert.NoError(t, err)
+		data := []byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"test"}]`)
+		fileName, teardown := setupFile(t, data)
+		defer teardown()
 
-		exp := addSampleExpense(t, js)
-		assert.Equal(t, []Expense{exp}, js.List())
-	})
-
-	t.Run("NewJSONStorage", func(t *testing.T) {
-		storage := bytes.NewBuffer([]byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`))
-
-		js, err := NewJSONStorage(storage, nil)
+		js, err := NewJSONStorage(fileName)
 		assert.NoError(t, err)
 
 		assert.Len(t, js.List(), 1)
-		assert.Equal(t, 250, js.List()[0].Amount)
+		assert.Equal(t, "test", js.List()[0].Name)
 	})
 }
 
@@ -60,13 +88,16 @@ func addSampleExpense(t testing.TB, es ExpenseStorage) Expense {
 
 func TestFormat(t *testing.T) {
 	t.Run("csv", func(t *testing.T) {
-		jsonStorage, err := NewJSONStorage(nil, nil)
-		assert.NoError(t, err)
-		addSampleExpense(t, jsonStorage)
-		csv := FormatCSV(jsonStorage)
+		t.Run("JSONStorage", func(t *testing.T) {
+			data := []byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`)
+			fileName, teardown := setupFile(t, data)
+			defer teardown()
 
-		assert.Equal(t, `name,amount,nws
-Groceries - supermarket,250,needs
-`, csv)
+			jsonStorage, err := NewJSONStorage(fileName)
+			assert.NoError(t, err)
+			csv := FormatCSV(jsonStorage)
+
+			assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
+		})
 	})
 }
