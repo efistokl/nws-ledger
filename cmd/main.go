@@ -3,17 +3,26 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/efistokl/nws-ledger/operations"
 )
 
 const supportedCommands = "'add', 'list'"
-const defaultStoreFile = "./store.json"
+const DefaultStoreFile = "./store.json"
 
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatalf("arguments. Needed. Supported commands %s", supportedCommands)
+	}
+
+	store, err := operations.NewJSONStorage(DefaultStoreFile)
+
+	if err != nil {
+		log.Fatalf("Failed creating storage from file %s: %v", DefaultStoreFile, err)
 	}
 
 	command := os.Args[1]
@@ -31,10 +40,14 @@ func main() {
 		if err := validateArgs(name, nws, amount); err != nil {
 			log.Fatal(err.Error())
 		}
+
+		store.Add(operations.Expense{Amount: amount, Name: name, NWS: operations.NWS(nws)})
 	case "list":
 		if len(os.Args[2:]) > 0 {
 			log.Fatal("list: no additional arguments supported")
 		}
+
+		fmt.Print(operations.FormatCSV(store))
 	default:
 		log.Fatalf("wrong command %s. Supported commands %s", command, supportedCommands)
 	}

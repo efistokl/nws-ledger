@@ -2,9 +2,11 @@ package main_test
 
 import (
 	"io"
+	"os"
 	"os/exec"
 	"testing"
 
+	main "github.com/efistokl/nws-ledger/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +17,13 @@ func TestMain(t *testing.T) {
 
 	binName := "./main"
 	assert.NoError(t, run("go", "build", "-o", binName))
+
+	assert.NoError(t, os.Rename(binName, os.TempDir()+binName))
+	assert.NoError(t, os.Chdir(os.TempDir()))
+	defer func() {
+		assert.NoError(t, os.Remove(binName))
+		assert.NoError(t, os.Remove(main.DefaultStoreFile))
+	}()
 
 	t.Run("Wrong args", func(t *testing.T) {
 		assert.Error(t, run(binName))
@@ -31,15 +40,17 @@ func TestMain(t *testing.T) {
 		output := runAndGetOutput(t, binName, "list")
 
 		assert.Equal(t, `name,amount,nws
-	"Groceries - supermarket",250,needs`, output)
+Groceries - supermarket,250,needs
+`, output)
 
 		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "new iPhone", "--nws", "wants"))
 
 		output = runAndGetOutput(t, binName, "list")
 
 		assert.Equal(t, `name,amount,nws
-	"Groceries - supermarket",250,needs
-	"new iPhone",700,wants`, output)
+Groceries - supermarket,250,needs
+new iPhone,700,wants
+`, output)
 	})
 }
 
