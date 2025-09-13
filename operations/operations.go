@@ -3,6 +3,7 @@ package operations
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -52,15 +53,23 @@ type JSONStorage struct {
 // NewJSONStorage initializes JSONStorage by parsing the file "fileName".
 // On every "Add" it rewrites the file.
 func NewJSONStorage(fileName string) (*JSONStorage, error) {
+	_, err := os.Stat(fileName)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return &JSONStorage{fileName, []Expense{}}, nil
+		}
+		return nil, fmt.Errorf("failed to get FileInfo for %s: %v", fileName, err)
+	}
+
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed opening file %s: %v", fileName, err)
 	}
 	defer file.Close()
 
 	var expenses []Expense
 	if err := json.NewDecoder(file).Decode(&expenses); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed decoding JSON from file %s: %v", fileName, err)
 	}
 
 	return &JSONStorage{fileName, expenses}, nil

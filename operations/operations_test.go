@@ -48,6 +48,27 @@ func TestJSONStorage(t *testing.T) {
 		assert.Equal(t, 250, js.Expenses[0].Amount)
 	})
 
+	t.Run("NewJSONStorage initializes with empty state when file doesn't exist", func(t *testing.T) {
+		fileName, teardown := setupFile(t, []byte(""))
+		teardown()
+
+		js, err := NewJSONStorage(fileName)
+		assert.NoError(t, err)
+		assert.Len(t, js.Expenses, 0)
+	})
+
+	t.Run("Add creates file even if it didn't exist", func(t *testing.T) {
+		fileName, teardown := setupFile(t, []byte(""))
+		teardown()
+
+		js, err := NewJSONStorage(fileName)
+		assert.NoError(t, err)
+		addSampleExpense(t, js)
+		assert.Len(t, js.Expenses, 1)
+		assert.FileExists(t, fileName)
+		assert.NoError(t, os.Remove(fileName))
+	})
+
 	t.Run("Add", func(t *testing.T) {
 		fileName, teardown := setupFile(t, []byte("[]"))
 		defer teardown()
