@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -13,7 +13,7 @@ const defaultStoreFile = "./store.json"
 
 func main() {
 	if len(os.Args) < 2 {
-		exitWithErrorMessage(fmt.Sprintf("arguments. Needed. Supported commands %s", supportedCommands))
+		log.Fatalf("arguments. Needed. Supported commands %s", supportedCommands)
 	}
 
 	command := os.Args[1]
@@ -29,14 +29,14 @@ func main() {
 		addFlags.Parse(os.Args[2:])
 		nws = strings.ToLower(nws)
 		if err := validateArgs(name, nws, amount); err != nil {
-			exitWithErrorMessage(err.Error())
+			log.Fatal(err.Error())
 		}
 	case "list":
 		if len(os.Args[2:]) > 0 {
-			exitWithErrorMessage("list: no additional arguments supported")
+			log.Fatal("list: no additional arguments supported")
 		}
 	default:
-		exitWithErrorMessage(fmt.Sprintf("wrong command %s. Supported commands %s", command, supportedCommands))
+		log.Fatalf("wrong command %s. Supported commands %s", command, supportedCommands)
 	}
 }
 
@@ -58,9 +58,4 @@ func validateArgs(name, nws string, amount int) error {
 	}
 
 	return nil
-}
-
-func exitWithErrorMessage(msg string) {
-	fmt.Fprintln(os.Stderr, msg)
-	os.Exit(1)
 }
