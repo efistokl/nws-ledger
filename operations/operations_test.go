@@ -94,18 +94,27 @@ func addSampleExpense(t testing.TB, es ExpenseStorage) Expense {
 	return expense
 }
 
+type StubExpenseStorage struct {
+	expenses []Expense
+}
+
+func (s *StubExpenseStorage) Add(_ Expense) error {
+	return nil
+}
+
+func (s *StubExpenseStorage) List() []Expense {
+	return s.expenses
+}
+
 func TestFormat(t *testing.T) {
-	t.Run("csv", func(t *testing.T) {
-		t.Run("JSONStorage", func(t *testing.T) {
-			data := []byte(`[{"amount":250,"nws":"needs","domain":"Groceries","name":"Groceries - supermarket"}]`)
-			file, teardown := setupFile(t, data)
-			defer teardown()
+	store := &StubExpenseStorage{
+		[]Expense{{
+			Amount: 250,
+			NWS:    NWS_Need,
+			Name:   "Groceries - supermarket",
+		}},
+	}
 
-			jsonStorage, err := NewJSONStorage(file)
-			assert.NoError(t, err)
-			csv := FormatCSV(jsonStorage)
-
-			assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
-		})
-	})
+	csv := FormatCSV(store)
+	assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
 }
