@@ -32,8 +32,8 @@ go.work.sum
 # .vscode/
 
 # Project specific
-cmd/main
-cmd/store.json
+main
+store.json
 
 # Mac OS
 .DS_Store
