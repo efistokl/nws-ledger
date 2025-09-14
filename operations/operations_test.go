@@ -86,7 +86,7 @@ func TestJSONStorage(t *testing.T) {
 func addSampleExpense(t testing.TB, es ExpenseStorage) Expense {
 	expense := Expense{
 		Amount: 250,
-		NWS:    NWS_Need,
+		NWS:    NWS_Needs,
 		Domain: "Groceries",
 		Name:   "Groceries - supermarket",
 	}
@@ -110,7 +110,7 @@ func TestFormat(t *testing.T) {
 	store := &StubExpenseStorage{
 		[]Expense{{
 			Amount: 250,
-			NWS:    NWS_Need,
+			NWS:    NWS_Needs,
 			Name:   "Groceries - supermarket",
 		}},
 	}

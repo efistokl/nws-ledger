@@ -12,9 +12,9 @@ import (
 type NWS string
 
 const (
-	NWS_Need   NWS = "needs"
-	NWS_Want   NWS = "wants"
-	NWS_Saving NWS = "savings"
+	NWS_Needs   NWS = "needs"
+	NWS_Wants   NWS = "wants"
+	NWS_Savings NWS = "savings"
 )
 
 type Expense struct {
@@ -45,9 +45,9 @@ func FormatCSV(es ExpenseStorage) string {
 	return b.String()
 }
 
+// JSONStorage stores expenses in the filesystem in JSON format
 type JSONStorage struct {
 	database *json.Encoder
-	// fileName string
 	Expenses []Expense
 }
 
@@ -89,10 +89,6 @@ func initializeJSONStorageFile(file *os.File) error {
 
 func (storage *JSONStorage) Add(e Expense) error {
 	storage.Expenses = append(storage.Expenses, e)
-	return storage.flush()
-}
-
-func (storage *JSONStorage) flush() error {
 	return storage.database.Encode(storage.Expenses)
 }
 
