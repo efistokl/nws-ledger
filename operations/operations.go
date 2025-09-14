@@ -3,8 +3,8 @@ package operations
 import (
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -46,33 +46,45 @@ func FormatCSV(es ExpenseStorage) string {
 }
 
 type JSONStorage struct {
-	fileName string
+	database *json.Encoder
+	// fileName string
 	Expenses []Expense
 }
 
-// NewJSONStorage initializes JSONStorage by parsing the file "fileName".
+// NewJSONStorage initializes JSONStorage by parsing the file.
 // On every "Add" it rewrites the file.
-func NewJSONStorage(fileName string) (*JSONStorage, error) {
-	_, err := os.Stat(fileName)
+func NewJSONStorage(file *os.File) (*JSONStorage, error) {
+	err := initializeJSONStorageFile(file)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return &JSONStorage{fileName, []Expense{}}, nil
-		}
-		return nil, fmt.Errorf("failed to get FileInfo for %s: %v", fileName, err)
+		return nil, fmt.Errorf("problem initializing JSONStorage file, %v", err)
 	}
-
-	file, err := os.Open(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("failed opening file %s: %v", fileName, err)
-	}
-	defer file.Close()
 
 	var expenses []Expense
 	if err := json.NewDecoder(file).Decode(&expenses); err != nil {
-		return nil, fmt.Errorf("failed decoding JSON from file %s: %v", fileName, err)
+		return nil, fmt.Errorf("failed decoding JSON from file %s: %v", file.Name(), err)
 	}
 
-	return &JSONStorage{fileName, expenses}, nil
+	return &JSONStorage{
+		database: json.NewEncoder(&tape{file}),
+		Expenses: expenses,
+	}, nil
+}
+
+func initializeJSONStorageFile(file *os.File) error {
+	file.Seek(0, io.SeekStart)
+
+	info, err := file.Stat()
+
+	if err != nil {
+		return fmt.Errorf("problem getting file info from file %s: %v", file.Name(), err)
+	}
+
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, io.SeekStart)
+	}
+
+	return nil
 }
 
 func (storage *JSONStorage) Add(e Expense) error {
@@ -81,13 +93,7 @@ func (storage *JSONStorage) Add(e Expense) error {
 }
 
 func (storage *JSONStorage) flush() error {
-	file, err := os.OpenFile(storage.fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0600)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	return json.NewEncoder(file).Encode(storage.Expenses)
+	return storage.database.Encode(storage.Expenses)
 }
 
 func (storage *JSONStorage) List() []Expense {

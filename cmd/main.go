@@ -19,10 +19,16 @@ func main() {
 		log.Fatalf("arguments. Needed. Supported commands %s", supportedCommands)
 	}
 
-	store, err := operations.NewJSONStorage(DefaultStoreFile)
+	database, err := os.OpenFile(DefaultStoreFile, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		log.Fatalf("error opening storage file %s: %v", DefaultStoreFile, err)
+	}
+	defer database.Close()
+
+	store, err := operations.NewJSONStorage(database)
 
 	if err != nil {
-		log.Fatalf("Failed creating storage from file %s: %v", DefaultStoreFile, err)
+		log.Fatalf("failed creating storage from file %s: %v", DefaultStoreFile, err)
 	}
 
 	command := os.Args[1]
