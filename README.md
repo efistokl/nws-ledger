@@ -33,3 +33,23 @@ nws list --last 7d
 nws summary --nws
 nws summary --domain
 ```
+
+### Current behavior (as of this commit)
+
+```bash
+$ nws add --amount 250 --name Groceries --nws needs
+$ nws add --amount 150 --name Stocks --nws savings
+$ nws add --amount 900 --name iPhone --nws wants
+$ nws list
+name,amount,nws
+Groceries,250,needs
+Stocks,150,savings
+iPhone,900,wants
+$ nws summary # expenses sums by NWS category
+nws,amount
+needs,250
+wants,900
+savings,150
+$ cat store.json # backed by plain JSON storage for now
+[{"amount":250,"nws":"needs","domain":"","name":"Groceries"},{"amount":150,"nws":"savings","domain":"","name":"Stocks"},{"amount":900,"nws":"wants","domain":"","name":"iPhone"}]
+```
