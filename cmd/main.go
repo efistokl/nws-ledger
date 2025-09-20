@@ -11,12 +11,12 @@ import (
 	"github.com/efistokl/nws-ledger/operations"
 )
 
-const supportedCommands = "'add', 'list'"
+const supportedCommands = "'add', 'list', 'summary'"
 const DefaultStoreFile = "./store.json"
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatalf("arguments. Needed. Supported commands %s", supportedCommands)
+		log.Fatalf("arguments needed. Supported commands %s", supportedCommands)
 	}
 
 	database, err := os.OpenFile(DefaultStoreFile, os.O_RDWR|os.O_CREATE, 0600)
