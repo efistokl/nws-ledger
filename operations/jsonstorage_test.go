@@ -81,6 +81,42 @@ func TestJSONStorage(t *testing.T) {
 		assert.Len(t, js.List(), 1)
 		assert.Equal(t, "test", js.List()[0].Name)
 	})
+
+	t.Run("Summary", func(t *testing.T) {
+		file, teardown := setupFile(t, []byte("[]"))
+		defer teardown()
+
+		js, err := NewJSONStorage(file)
+		assert.NoError(t, err)
+
+		expenses := []Expense{
+			{
+				Amount: 200,
+				NWS:    NWS_Needs,
+			},
+			{
+				Amount: 150,
+				NWS:    NWS_Needs,
+			},
+			{
+				Amount: 500,
+				NWS:    NWS_Wants,
+			},
+			{
+				Amount: 50,
+				NWS:    NWS_Savings,
+			},
+		}
+
+		for _, e := range expenses {
+			assert.NoError(t, js.Add(e))
+		}
+
+		summary := js.Summary()
+		assert.Equal(t, 350, summary[NWS_Needs])
+		assert.Equal(t, 500, summary[NWS_Wants])
+		assert.Equal(t, 50, summary[NWS_Savings])
+	})
 }
 
 func addSampleExpense(t testing.TB, es ExpenseStorage) Expense {

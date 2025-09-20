@@ -21,9 +21,12 @@ type Expense struct {
 	Name   string `json:"name"`
 }
 
+type SummaryByNWS map[NWS]int
+
 type ExpenseStorage interface {
 	Add(Expense) error
 	List() []Expense
+	Summary() SummaryByNWS
 }
 
 func FormatCSV(es ExpenseStorage) string {

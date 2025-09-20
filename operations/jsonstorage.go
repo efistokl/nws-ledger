@@ -57,3 +57,11 @@ func (storage *JSONStorage) Add(e Expense) error {
 func (storage *JSONStorage) List() []Expense {
 	return storage.Expenses
 }
+
+func (storage *JSONStorage) Summary() SummaryByNWS {
+	summary := make(SummaryByNWS)
+	for _, e := range storage.Expenses {
+		summary[e.NWS] += e.Amount
+	}
+	return summary
+}

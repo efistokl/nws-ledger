@@ -18,6 +18,10 @@ func (s *StubExpenseStorage) List() []Expense {
 	return s.expenses
 }
 
+func (s *StubExpenseStorage) Summary() SummaryByNWS {
+	return nil
+}
+
 func TestFormat(t *testing.T) {
 	store := &StubExpenseStorage{
 		[]Expense{{
