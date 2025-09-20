@@ -62,7 +62,7 @@ func run(binName string, args ...string) error {
 func runAndGetOutput(t *testing.T, binName string, args ...string) string {
 	t.Helper()
 	cmd := exec.Command(binName, args...)
-
+	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	assert.NoError(t, err)
 
