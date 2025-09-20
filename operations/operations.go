@@ -29,7 +29,7 @@ type ExpenseStorage interface {
 	Summary() SummaryByNWS
 }
 
-func FormatCSV(es ExpenseStorage) string {
+func FormatCSVList(es ExpenseStorage) string {
 	var b strings.Builder
 	writer := csv.NewWriter(&b)
 

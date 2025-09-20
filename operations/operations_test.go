@@ -31,6 +31,6 @@ func TestFormat(t *testing.T) {
 		}},
 	}
 
-	csv := FormatCSV(store)
+	csv := FormatCSVList(store)
 	assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
 }

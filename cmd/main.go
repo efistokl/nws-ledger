@@ -53,7 +53,7 @@ func main() {
 			log.Fatal("list: no additional arguments supported")
 		}
 
-		fmt.Print(operations.FormatCSV(store))
+		fmt.Print(operations.FormatCSVList(store))
 	default:
 		log.Fatalf("wrong command %s. Supported commands %s", command, supportedCommands)
 	}
