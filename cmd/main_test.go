@@ -60,6 +60,7 @@ new iPhone,700,wants
 needs,250
 wants,1400
 savings,0
+total,1650
 `, output)
 	})
 }

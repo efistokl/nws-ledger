@@ -49,6 +49,6 @@ func TestFormat(t *testing.T) {
 		}
 
 		csv := FormatCSVSummary(store)
-		assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\n", csv)
+		assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\ntotal,450\n", csv)
 	})
 }

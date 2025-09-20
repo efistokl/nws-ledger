@@ -54,13 +54,19 @@ func FormatCSVSummary(es ExpenseStorage) string {
 	writer := csv.NewWriter(&b)
 
 	writer.Write([]string{"nws", "amount"})
-
+	total := 0
 	for _, nws := range nwss {
 		writer.Write([]string{
 			string(nws),
 			fmt.Sprintf("%d", summary[nws]),
 		})
+		total += summary[nws]
 	}
+
+	writer.Write([]string{
+		"total",
+		fmt.Sprintf("%d", total),
+	})
 
 	writer.Flush()
 	return b.String()

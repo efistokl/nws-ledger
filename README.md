@@ -50,6 +50,7 @@ nws,amount
 needs,250
 wants,900
 savings,150
+total,1300
 $ cat store.json # backed by plain JSON storage for now
 [{"amount":250,"nws":"needs","domain":"","name":"Groceries"},{"amount":150,"nws":"savings","domain":"","name":"Stocks"},{"amount":900,"nws":"wants","domain":"","name":"iPhone"}]
 ```
