@@ -3,17 +3,17 @@ Expense tracker with Needs-Wants-Savings support
 
 ### Roadmap (phases)
 
-1. **MVP:**
+1. **MVP:** 🟢 done
     - JSON storage
     - `add`, `list`, `summary` by NWS
-2. **Phase 2:**
+2. **Phase 2:** 🟡 next todo
     - Domain categories support
     - Filtering (`-last`, `-domain`, `-nws`)
-3. **Phase 3:**
+3. **Phase 3:** 🟡 todo
     - SQLite backend
     - Monthly budgets
     - Export/Import
-4. **Phase 4:**
+4. **Phase 4:** 🟡 todo
     - TUI
     - Sync (maybe via Git repo push/pull)
 
