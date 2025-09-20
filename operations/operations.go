@@ -14,6 +14,8 @@ const (
 	NWS_Savings NWS = "savings"
 )
 
+var nwss = []NWS{NWS_Needs, NWS_Wants, NWS_Savings}
+
 type Expense struct {
 	Amount int    `json:"amount"`
 	NWS    NWS    `json:"nws"`
@@ -41,6 +43,25 @@ func FormatCSVList(es ExpenseStorage) string {
 			string(e.NWS),
 		})
 	}
+	writer.Flush()
+	return b.String()
+}
+
+func FormatCSVSummary(es ExpenseStorage) string {
+	summary := es.Summary()
+
+	var b strings.Builder
+	writer := csv.NewWriter(&b)
+
+	writer.Write([]string{"nws", "amount"})
+
+	for _, nws := range nwss {
+		writer.Write([]string{
+			string(nws),
+			fmt.Sprintf("%d", summary[nws]),
+		})
+	}
+
 	writer.Flush()
 	return b.String()
 }

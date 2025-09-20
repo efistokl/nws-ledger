@@ -8,6 +8,7 @@ import (
 
 type StubExpenseStorage struct {
 	expenses []Expense
+	summary  SummaryByNWS
 }
 
 func (s *StubExpenseStorage) Add(_ Expense) error {
@@ -19,18 +20,35 @@ func (s *StubExpenseStorage) List() []Expense {
 }
 
 func (s *StubExpenseStorage) Summary() SummaryByNWS {
-	return nil
+	return s.summary
 }
 
 func TestFormat(t *testing.T) {
-	store := &StubExpenseStorage{
-		[]Expense{{
-			Amount: 250,
-			NWS:    NWS_Needs,
-			Name:   "Groceries - supermarket",
-		}},
-	}
+	t.Run("List", func(t *testing.T) {
+		store := &StubExpenseStorage{
+			[]Expense{{
+				Amount: 250,
+				NWS:    NWS_Needs,
+				Name:   "Groceries - supermarket",
+			}},
+			nil,
+		}
 
-	csv := FormatCSVList(store)
-	assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
+		csv := FormatCSVList(store)
+		assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
+	})
+
+	t.Run("Summary", func(t *testing.T) {
+		store := &StubExpenseStorage{
+			nil,
+			SummaryByNWS{
+				NWS_Needs:   300,
+				NWS_Wants:   100,
+				NWS_Savings: 50,
+			},
+		}
+
+		csv := FormatCSVSummary(store)
+		assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\n", csv)
+	})
 }
