@@ -34,7 +34,7 @@ func TestMain(t *testing.T) {
 		assert.Error(t, run(binName, "list", "args"))
 	})
 
-	t.Run("Add + List", func(t *testing.T) {
+	t.Run("Add + List + Summary", func(t *testing.T) {
 		assert.NoError(t, run(binName, "add", "--amount", "250", "--name", "Groceries - supermarket", "--nws", "needs"))
 
 		output := runAndGetOutput(t, binName, "list")
@@ -50,6 +50,16 @@ Groceries - supermarket,250,needs
 		assert.Equal(t, `name,amount,nws
 Groceries - supermarket,250,needs
 new iPhone,700,wants
+`, output)
+
+		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "another iPhone", "--nws", "wants"))
+
+		output = runAndGetOutput(t, binName, "summary")
+
+		assert.Equal(t, `nws,amount
+needs,250
+wants,1400
+savings,0
 `, output)
 	})
 }
