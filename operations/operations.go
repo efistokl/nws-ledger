@@ -3,6 +3,7 @@ package operations
 import (
 	"encoding/csv"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -15,6 +16,13 @@ const (
 )
 
 var nwss = []NWS{NWS_Needs, NWS_Wants, NWS_Savings}
+
+func ValidateNWS(s string) error {
+	if !slices.Contains(nwss, NWS(s)) {
+		return fmt.Errorf("supported values: %v", nwss)
+	}
+	return nil
+}
 
 type Expense struct {
 	Amount int    `json:"amount"`

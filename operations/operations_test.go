@@ -52,3 +52,10 @@ func TestFormat(t *testing.T) {
 		assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\ntotal,450\n", csv)
 	})
 }
+
+func TestValidateNWS(t *testing.T) {
+	assert.NoError(t, ValidateNWS("wants"))
+	assert.NoError(t, ValidateNWS("needs"))
+	assert.NoError(t, ValidateNWS("savings"))
+	assert.Error(t, ValidateNWS("deeds"))
+}

@@ -74,8 +74,8 @@ func validateArgs(name, nws string, amount int) error {
 		return errors.New("--nws cannot be empty")
 	}
 
-	if nws != "wants" && nws != "needs" && nws != "savings" {
-		return errors.New("supported values for --nws: needs/wants/savings")
+	if err := operations.ValidateNWS(nws); err != nil {
+		return fmt.Errorf("--nws: %w", err)
 	}
 
 	if amount <= 0 {
