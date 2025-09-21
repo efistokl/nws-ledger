@@ -33,6 +33,7 @@ go.work.sum
 
 # Project specific
 main
+nws
 store.json
 
 # Mac OS
