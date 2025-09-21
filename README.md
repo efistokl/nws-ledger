@@ -7,8 +7,8 @@ Expense tracker with Needs-Wants-Savings support
     - JSON storage
     - `add`, `list`, `summary` by NWS
 2. **Phase 2:** 🟡 next todo
-    - Domain categories support
-    - Filtering (`-last`, `-domain`, `-nws`)
+    - Domain categories support (DONE)
+    - Filtering (`-last`, `-domain`, `-nws`) (need to add timestamps to expenses)
 3. **Phase 3:** 🟡 todo
     - SQLite backend
     - Monthly budgets
@@ -37,20 +37,26 @@ nws summary --domain
 ### Current behavior (as of this commit)
 
 ```bash
-$ nws add --amount 250 --name Groceries --nws needs
-$ nws add --amount 150 --name Stocks --nws savings
-$ nws add --amount 900 --name iPhone --nws wants
+$ nws add --amount 250 --name Weekly --nws needs --domain groceries
+$ nws add --amount 150 --name VTI --nws savings --domain stocks
+$ nws add --amount 900 --name iPhone --nws wants --domain shopping
 $ nws list
-name,amount,nws
-Groceries,250,needs
-Stocks,150,savings
-iPhone,900,wants
+name,amount,nws,domain
+Weekly,250,needs,groceries
+VTI,150,savings,stocks
+iPhone,900,wants,shopping
 $ nws summary # expenses sums by NWS category
 nws,amount
 needs,250
 wants,900
 savings,150
 total,1300
+$ nws summary --domain # expenses sums by Domain category
+domain,amount
+shopping,900
+groceries,250
+stocks,150
+total,1300
 $ cat store.json # backed by plain JSON storage for now
-[{"amount":250,"nws":"needs","domain":"","name":"Groceries"},{"amount":150,"nws":"savings","domain":"","name":"Stocks"},{"amount":900,"nws":"wants","domain":"","name":"iPhone"}]
+[{"amount":250,"nws":"needs","domain":"groceries","name":"Weekly"},{"amount":150,"nws":"savings","domain":"stocks","name":"VTI"},{"amount":900,"nws":"wants","domain":"shopping","name":"iPhone"}]
 ```
