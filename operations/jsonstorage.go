@@ -58,10 +58,18 @@ func (storage *JSONStorage) List() []Expense {
 	return storage.Expenses
 }
 
-func (storage *JSONStorage) Summary() SummaryByNWS {
-	summary := make(SummaryByNWS)
+func (storage *JSONStorage) SummaryByNWS() Summary {
+	summary := make(Summary)
 	for _, e := range storage.Expenses {
 		summary[e.NWS] += e.Amount
+	}
+	return summary
+}
+
+func (storage *JSONStorage) SummaryByDomain() Summary {
+	summary := make(Summary)
+	for _, e := range storage.Expenses {
+		summary[e.Domain] += e.Amount
 	}
 	return summary
 }

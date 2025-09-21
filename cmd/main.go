@@ -48,7 +48,7 @@ func main() {
 			log.Fatal(err.Error())
 		}
 
-		store.Add(operations.Expense{Amount: amount, Name: name, NWS: operations.NWS(nws), Domain: domain})
+		store.Add(operations.Expense{Amount: amount, Name: name, NWS: nws, Domain: domain})
 	case "list":
 		if len(os.Args[2:]) > 0 {
 			log.Fatal("list: no additional arguments supported")
@@ -60,7 +60,7 @@ func main() {
 			log.Fatal("summary: no additional arguments supported")
 		}
 
-		fmt.Print(operations.FormatCSVSummary(store))
+		fmt.Print(operations.FormatCSVSummaryByNWS(store))
 	default:
 		log.Fatalf("wrong command %s. Supported commands %s", command, supportedCommands)
 	}

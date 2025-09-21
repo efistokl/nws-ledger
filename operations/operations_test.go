@@ -8,7 +8,7 @@ import (
 
 type StubExpenseStorage struct {
 	expenses []Expense
-	summary  SummaryByNWS
+	summary  Summary
 }
 
 func (s *StubExpenseStorage) Add(_ Expense) error {
@@ -19,7 +19,11 @@ func (s *StubExpenseStorage) List() []Expense {
 	return s.expenses
 }
 
-func (s *StubExpenseStorage) Summary() SummaryByNWS {
+func (s *StubExpenseStorage) SummaryByNWS() Summary {
+	return s.summary
+}
+
+func (s *StubExpenseStorage) SummaryByDomain() Summary {
 	return s.summary
 }
 
@@ -40,17 +44,32 @@ func TestFormat(t *testing.T) {
 	})
 
 	t.Run("Summary", func(t *testing.T) {
-		store := &StubExpenseStorage{
-			nil,
-			SummaryByNWS{
-				NWS_Needs:   300,
-				NWS_Wants:   100,
-				NWS_Savings: 50,
-			},
-		}
+		t.Run("by NWS", func(t *testing.T) {
+			store := &StubExpenseStorage{
+				nil,
+				Summary{
+					NWS_Needs:   300,
+					NWS_Wants:   100,
+					NWS_Savings: 50,
+				},
+			}
 
-		csv := FormatCSVSummary(store)
-		assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\ntotal,450\n", csv)
+			csv := FormatCSVSummaryByNWS(store)
+			assert.Equal(t, "nws,amount\nneeds,300\nwants,100\nsavings,50\ntotal,450\n", csv)
+		})
+
+		t.Run("by Domain", func(t *testing.T) {
+			store := &StubExpenseStorage{
+				nil,
+				Summary{
+					"groceries": 200,
+					"shopping":  100,
+				},
+			}
+
+			csv := FormatCSVSummaryByDomain(store)
+			assert.Equal(t, "domain,amount\ngroceries,200\nshopping,100\ntotal,300\n", csv)
+		})
 	})
 }
 

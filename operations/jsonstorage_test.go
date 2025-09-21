@@ -82,7 +82,7 @@ func TestJSONStorage(t *testing.T) {
 		assert.Equal(t, "test", js.List()[0].Name)
 	})
 
-	t.Run("Summary", func(t *testing.T) {
+	t.Run("Summary by NWS", func(t *testing.T) {
 		file, teardown := setupFile(t, []byte("[]"))
 		defer teardown()
 
@@ -112,10 +112,50 @@ func TestJSONStorage(t *testing.T) {
 			assert.NoError(t, js.Add(e))
 		}
 
-		summary := js.Summary()
+		summary := js.SummaryByNWS()
 		assert.Equal(t, 350, summary[NWS_Needs])
 		assert.Equal(t, 500, summary[NWS_Wants])
 		assert.Equal(t, 50, summary[NWS_Savings])
+	})
+
+	t.Run("Summary by Domain", func(t *testing.T) {
+		file, teardown := setupFile(t, []byte("[]"))
+		defer teardown()
+
+		js, err := NewJSONStorage(file)
+		assert.NoError(t, err)
+
+		expenses := []Expense{
+			{
+				Amount: 200,
+				NWS:    NWS_Needs,
+				Domain: "groceries",
+			},
+			{
+				Amount: 150,
+				NWS:    NWS_Needs,
+				Domain: "shopping",
+			},
+			{
+				Amount: 100,
+				NWS:    NWS_Wants,
+				Domain: "groceries",
+			},
+			{
+				Amount: 50,
+				NWS:    NWS_Savings,
+				Domain: "stocks",
+			},
+		}
+
+		for _, e := range expenses {
+			assert.NoError(t, js.Add(e))
+		}
+
+		summary := js.SummaryByDomain()
+		assert.Equal(t, 300, summary["groceries"])
+		assert.Equal(t, 150, summary["shopping"])
+		assert.Equal(t, 50, summary["stocks"])
 	})
 }
 

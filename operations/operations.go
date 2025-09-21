@@ -7,18 +7,16 @@ import (
 	"strings"
 )
 
-type NWS string
-
 const (
-	NWS_Needs   NWS = "needs"
-	NWS_Wants   NWS = "wants"
-	NWS_Savings NWS = "savings"
+	NWS_Needs   = "needs"
+	NWS_Wants   = "wants"
+	NWS_Savings = "savings"
 )
 
-var nwss = []NWS{NWS_Needs, NWS_Wants, NWS_Savings}
+var nwss = []string{NWS_Needs, NWS_Wants, NWS_Savings}
 
 func ValidateNWS(s string) error {
-	if !slices.Contains(nwss, NWS(s)) {
+	if !slices.Contains(nwss, s) {
 		return fmt.Errorf("supported values: %v", nwss)
 	}
 	return nil
@@ -26,17 +24,18 @@ func ValidateNWS(s string) error {
 
 type Expense struct {
 	Amount int    `json:"amount"`
-	NWS    NWS    `json:"nws"`
+	NWS    string `json:"nws"`
 	Domain string `json:"domain"`
 	Name   string `json:"name"`
 }
 
-type SummaryByNWS map[NWS]int
+type Summary map[string]int
 
 type ExpenseStorage interface {
 	Add(Expense) error
 	List() []Expense
-	Summary() SummaryByNWS
+	SummaryByNWS() Summary
+	SummaryByDomain() Summary
 }
 
 func FormatCSVList(es ExpenseStorage) string {
@@ -56,27 +55,44 @@ func FormatCSVList(es ExpenseStorage) string {
 	return b.String()
 }
 
-func FormatCSVSummary(es ExpenseStorage) string {
-	summary := es.Summary()
+func FormatCSVSummaryByNWS(es ExpenseStorage) string {
+	summary := es.SummaryByNWS()
+	return writeSummaryCSV("nws", nwss, summary)
+}
 
-	var b strings.Builder
-	writer := csv.NewWriter(&b)
+func FormatCSVSummaryByDomain(es ExpenseStorage) string {
+	summary := es.SummaryByDomain()
 
-	writer.Write([]string{"nws", "amount"})
-	total := 0
-	for _, nws := range nwss {
-		writer.Write([]string{
-			string(nws),
-			fmt.Sprintf("%d", summary[nws]),
-		})
-		total += summary[nws]
+	domains := make([]string, 0, len(summary))
+	for k := range summary {
+		domains = append(domains, k)
 	}
 
-	writer.Write([]string{
+	slices.SortFunc(domains, func(a, b string) int {
+		return summary[b] - summary[a]
+	})
+
+	return writeSummaryCSV("domain", domains, summary)
+}
+
+func writeSummaryCSV(name string, keys []string, values map[string]int) string {
+	var b strings.Builder
+	w := csv.NewWriter(&b)
+	w.Write([]string{name, "amount"})
+
+	total := 0
+	for _, key := range keys {
+		w.Write([]string{
+			key,
+			fmt.Sprintf("%d", values[key]),
+		})
+		total += values[key]
+	}
+	w.Write([]string{
 		"total",
 		fmt.Sprintf("%d", total),
 	})
 
-	writer.Flush()
+	w.Flush()
 	return b.String()
 }
