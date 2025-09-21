@@ -62,6 +62,13 @@ wants,1400
 savings,0
 total,1650
 `, output)
+
+		output = runAndGetOutput(t, binName, "summary", "--domain")
+		assert.Equal(t, `domain,amount
+shopping,1400
+groceries,250
+total,1650
+`, output)
 	})
 }
 

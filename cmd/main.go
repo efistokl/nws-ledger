@@ -56,11 +56,16 @@ func main() {
 
 		fmt.Print(operations.FormatCSVList(store))
 	case "summary":
-		if len(os.Args[2:]) > 0 {
-			log.Fatal("summary: no additional arguments supported")
-		}
+		var domain bool
+		summaryFlags := flag.NewFlagSet("summary", flag.ExitOnError)
+		summaryFlags.BoolVar(&domain, "domain", false, "Summary by Domain")
+		summaryFlags.Parse(os.Args[2:])
 
-		fmt.Print(operations.FormatCSVSummaryByNWS(store))
+		if domain {
+			fmt.Print(operations.FormatCSVSummaryByDomain(store))
+		} else {
+			fmt.Print(operations.FormatCSVSummaryByNWS(store))
+		}
 	default:
 		log.Fatalf("wrong command %s. Supported commands %s", command, supportedCommands)
 	}
