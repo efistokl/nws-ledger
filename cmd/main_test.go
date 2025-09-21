@@ -35,24 +35,24 @@ func TestMain(t *testing.T) {
 	})
 
 	t.Run("Add + List + Summary", func(t *testing.T) {
-		assert.NoError(t, run(binName, "add", "--amount", "250", "--name", "Groceries - supermarket", "--nws", "needs"))
+		assert.NoError(t, run(binName, "add", "--amount", "250", "--name", "Groceries - supermarket", "--nws", "needs", "--domain", "groceries"))
 
 		output := runAndGetOutput(t, binName, "list")
 
-		assert.Equal(t, `name,amount,nws
-Groceries - supermarket,250,needs
+		assert.Equal(t, `name,amount,nws,domain
+Groceries - supermarket,250,needs,groceries
 `, output)
 
-		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "new iPhone", "--nws", "wants"))
+		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "new iPhone", "--nws", "wants", "--domain", "shopping"))
 
 		output = runAndGetOutput(t, binName, "list")
 
-		assert.Equal(t, `name,amount,nws
-Groceries - supermarket,250,needs
-new iPhone,700,wants
+		assert.Equal(t, `name,amount,nws,domain
+Groceries - supermarket,250,needs,groceries
+new iPhone,700,wants,shopping
 `, output)
 
-		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "another iPhone", "--nws", "wants"))
+		assert.NoError(t, run(binName, "add", "--amount", "700", "--name", "another iPhone", "--nws", "wants", "--domain", "shopping"))
 
 		output = runAndGetOutput(t, binName, "summary")
 

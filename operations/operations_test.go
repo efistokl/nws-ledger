@@ -30,12 +30,13 @@ func TestFormat(t *testing.T) {
 				Amount: 250,
 				NWS:    NWS_Needs,
 				Name:   "Groceries - supermarket",
+				Domain: "groceries",
 			}},
 			nil,
 		}
 
 		csv := FormatCSVList(store)
-		assert.Equal(t, "name,amount,nws\nGroceries - supermarket,250,needs\n", csv)
+		assert.Equal(t, "name,amount,nws,domain\nGroceries - supermarket,250,needs,groceries\n", csv)
 	})
 
 	t.Run("Summary", func(t *testing.T) {

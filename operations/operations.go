@@ -43,12 +43,13 @@ func FormatCSVList(es ExpenseStorage) string {
 	var b strings.Builder
 	writer := csv.NewWriter(&b)
 
-	writer.Write([]string{"name", "amount", "nws"})
+	writer.Write([]string{"name", "amount", "nws", "domain"})
 	for _, e := range es.List() {
 		writer.Write([]string{
 			e.Name,
 			fmt.Sprintf("%d", e.Amount),
 			string(e.NWS),
+			e.Domain,
 		})
 	}
 	writer.Flush()

@@ -35,11 +35,12 @@ func main() {
 
 	switch command {
 	case "add":
-		var name, nws string
+		var name, nws, domain string
 		var amount int
 		addFlags := flag.NewFlagSet("add", flag.ExitOnError)
 		addFlags.StringVar(&name, "name", "", "Name of the expense")
 		addFlags.StringVar(&nws, "nws", "", "Category of the expense: needs/wants/savings")
+		addFlags.StringVar(&domain, "domain", "", "Domain category of the expense: groceries/shopping/rent/... (whatever)")
 		addFlags.IntVar(&amount, "amount", -1, "Sum spent")
 		addFlags.Parse(os.Args[2:])
 		nws = strings.ToLower(nws)
@@ -47,7 +48,7 @@ func main() {
 			log.Fatal(err.Error())
 		}
 
-		store.Add(operations.Expense{Amount: amount, Name: name, NWS: operations.NWS(nws)})
+		store.Add(operations.Expense{Amount: amount, Name: name, NWS: operations.NWS(nws), Domain: domain})
 	case "list":
 		if len(os.Args[2:]) > 0 {
 			log.Fatal("list: no additional arguments supported")
