@@ -56,7 +56,7 @@ func main() {
 		fmt.Print(operations.FormatCSVList(store))
 	case "summary":
 		if len(os.Args[2:]) > 0 {
-			log.Fatal("list: no additional arguments supported")
+			log.Fatal("summary: no additional arguments supported")
 		}
 
 		fmt.Print(operations.FormatCSVSummary(store))
