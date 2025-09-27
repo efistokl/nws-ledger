@@ -1,5 +1,5 @@
 # nws-ledger
-Expense tracker with Needs-Wants-Savings support
+Expense tracker with Needs-Wants-Savings support ( ⚠️ experimental - a learning project )
 
 ### Roadmap (phases)
 
